@@ -1,4 +1,4 @@
-const BOARD_SIZE: usize = 8;
+const BOARD_SIZE: usize = 16;
 
 fn main() {
     let board = build_board();
@@ -7,13 +7,13 @@ fn main() {
 
 fn build_board() -> Vec<Vec<char>> {
     let vert_wall = '|';
-    let hor_wall = '_';
+    let hor_wall = '#';
     let blank_square = ' ';
 
-    let cieling = vec![hor_wall; BOARD_SIZE + 2];
+    let top_and_bottom = vec![hor_wall; BOARD_SIZE + 2];
     let mut board = Vec::with_capacity(BOARD_SIZE + 2);
 
-    board.push(cieling);
+    board.push(top_and_bottom);
 
     for _ in 0..BOARD_SIZE {
         let mut row = Vec::with_capacity(BOARD_SIZE + 2);
@@ -24,13 +24,9 @@ fn build_board() -> Vec<Vec<char>> {
         row.push(vert_wall);
         board.push(row);
     }
-    let mut row = Vec::with_capacity(BOARD_SIZE + 2);
-    row.push(vert_wall);
-    for _ in 0..BOARD_SIZE {
-        row.push(hor_wall);
-    }
-    row.push(vert_wall);
-    board.push(row);
+    let top_and_bottom = vec![hor_wall; BOARD_SIZE + 2];
+
+    board.push(top_and_bottom);
 
     board
 }
