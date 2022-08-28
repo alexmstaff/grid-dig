@@ -25,9 +25,9 @@ fn game_loop(board: &mut Board, player: &mut Player) -> io::Result<()> {
     loop {
         term.clear_screen()?;
 
-        let (x, y) = player.location.get_loc();
-        board.vector[y][x] = player.symbol;
-        print_board(&board.vector);
+        let player_loc = player.get_loc();
+        board.set_cell(player_loc, player.get_symbol());
+        print_board(&board);
 
         let user_move = term.read_key()?;
         match user_move {

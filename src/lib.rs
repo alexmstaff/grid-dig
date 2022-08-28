@@ -1,5 +1,5 @@
-pub const BOARD_SIZE: usize = 16;
-pub const BLANK_SQUARE: char = ' ';
+const BOARD_SIZE: usize = 16;
+const BLANK_SQUARE: char = ' ';
 
 pub fn move_player(player: &mut Player, board: &mut Board, target: (i8, i8)) {
     {
@@ -44,7 +44,9 @@ pub fn build_board() -> Vec<Vec<char>> {
     board
 }
 
-pub fn print_board(board: &Vec<Vec<char>>) {
+pub fn print_board(board: &Board) {
+    let board = &board.vector;
+
     for row in 0..board.len() {
         for cell in 0..board[row].len() {
             print!("{}", board[row][cell])
@@ -62,8 +64,8 @@ fn add_target_to_loc(u: usize, i: i8) -> Option<usize> {
 }
 
 pub struct Player {
-    pub location: BoardLoc,
-    pub symbol: char,
+    location: BoardLoc,
+    symbol: char,
 }
 
 impl Player {
@@ -81,10 +83,18 @@ impl Player {
         self.location.x = player_loc.x;
         self.location.y = player_loc.y;
     }
+
+    pub fn get_loc(&self) -> (usize, usize) {
+        self.location.get_loc()
+    }
+
+    pub fn get_symbol(&self) -> char {
+        self.symbol
+    }
 }
 
 pub struct Board {
-    pub vector: Vec<Vec<char>>,
+    vector: Vec<Vec<char>>,
 }
 
 impl Board {
@@ -96,6 +106,10 @@ impl Board {
 
     fn get_cell(&self, player_loc: BoardLoc) -> char {
         self.vector[player_loc.y][player_loc.x]
+    }
+
+    pub fn set_cell(&mut self, target: (usize, usize), symbol: char) {
+        self.vector[target.1][target.0] = symbol;
     }
 }
 
@@ -112,7 +126,7 @@ impl BoardLoc {
         }
     }
 
-    pub fn get_loc(&self) -> (usize, usize) {
+    fn get_loc(&self) -> (usize, usize) {
         (self.x, self.y)
     }
 }
