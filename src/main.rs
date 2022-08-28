@@ -4,13 +4,13 @@ use console::{Key, Term};
 use grid_dig::{move_player, print_board, Board, Player};
 
 fn main() {
-    let mut board = Board::new();
-    let mut player = Player::new();
-    game_loop(&mut board, &mut player).unwrap();
+    let board = Board::new();
+    let player = Player::new();
+    game_loop(board, player).unwrap();
     println!("Thanks for playing!")
 }
 
-fn game_loop(board: &mut Board, player: &mut Player) -> io::Result<()> {
+fn game_loop(mut board: Board, mut player: Player) -> io::Result<()> {
     let term = Term::stdout();
 
     term.hide_cursor()?;
@@ -32,16 +32,16 @@ fn game_loop(board: &mut Board, player: &mut Player) -> io::Result<()> {
         let user_move = term.read_key()?;
         match user_move {
             Key::ArrowUp => {
-                move_player(player, board, (0, -1));
+                move_player(&mut player, &mut board, (0, -1));
             }
             Key::ArrowDown => {
-                move_player(player, board, (0, 1));
+                move_player(&mut player, &mut board, (0, 1));
             }
             Key::ArrowLeft => {
-                move_player(player, board, (-1, 0));
+                move_player(&mut player, &mut board, (-1, 0));
             }
             Key::ArrowRight => {
-                move_player(player, board, (1, 0));
+                move_player(&mut player, &mut board, (1, 0));
             }
             Key::Escape => {
                 break;

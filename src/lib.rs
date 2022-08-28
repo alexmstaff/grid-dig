@@ -1,3 +1,4 @@
+use console::style;
 use rand::Rng;
 
 const BOARD_SIZE: usize = 16;
@@ -29,7 +30,7 @@ pub fn move_player(player: &mut Player, board: &mut Board, target: (i8, i8)) {
     };
 }
 
-pub fn build_board() -> Vec<Vec<char>> {
+pub fn build_board_vector() -> Vec<Vec<char>> {
     let vert_wall = '|';
     let hor_wall = '#';
 
@@ -64,7 +65,20 @@ pub fn print_board(board: &Board) {
 
     for row in 0..board.len() {
         for cell in 0..board[row].len() {
-            print!("{}", board[row][cell])
+            match board[row][cell] {
+                '#' | '|' => {
+                    print!("{}", style(board[row][cell]).cyan())
+                }
+                EARTH_SQUARE => {
+                    print!("{}", style(board[row][cell]).yellow())
+                }
+                '@' => {
+                    print!("{}", style(board[row][cell]).green())
+                }
+                _ => {
+                    print!("{}", (board[row][cell]))
+                }
+            }
         }
         println!()
     }
@@ -115,7 +129,7 @@ pub struct Board {
 impl Board {
     pub fn new() -> Board {
         Board {
-            vector: build_board(),
+            vector: build_board_vector(),
         }
     }
 
