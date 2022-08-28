@@ -62,7 +62,6 @@ pub fn build_board_vector() -> Vec<Vec<char>> {
 
 pub fn print_board(board: &Board) {
     let board = &board.vector;
-
     for row in 0..board.len() {
         for cell in 0..board[row].len() {
             match board[row][cell] {

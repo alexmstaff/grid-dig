@@ -21,13 +21,14 @@ fn game_loop(mut board: Board, mut player: Player) -> io::Result<()> {
     println!("Press any key to start");
 
     term.read_key()?;
+    term.clear_screen()?;
 
     loop {
-        term.clear_screen()?;
-
         let player_loc = player.get_loc();
         board.set_cell(player_loc, player.get_symbol());
+
         print_board(&board);
+        term.move_cursor_to(0, 0)?;
 
         let user_move = term.read_key()?;
         match user_move {
