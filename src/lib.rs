@@ -1,5 +1,8 @@
+use rand::Rng;
+
 const BOARD_SIZE: usize = 16;
 const BLANK_SQUARE: char = ' ';
+const EARTH_SQUARE: char = 'ↈ';
 
 pub fn move_player(player: &mut Player, board: &mut Board, target: (i8, i8)) {
     {
@@ -7,7 +10,14 @@ pub fn move_player(player: &mut Player, board: &mut Board, target: (i8, i8)) {
         let target_square = board.get_cell(BoardLoc::location_from_target(&player_loc, target));
 
         match target_square {
-            ' ' => {
+            BLANK_SQUARE => {
+                board.vector[player_loc.1][player_loc.0] = crate::BLANK_SQUARE;
+                player.set_loc(BoardLoc::location_from_target(
+                    &player.location.get_loc(),
+                    target,
+                ));
+            }
+            EARTH_SQUARE => {
                 board.vector[player_loc.1][player_loc.0] = crate::BLANK_SQUARE;
                 player.set_loc(BoardLoc::location_from_target(
                     &player.location.get_loc(),
@@ -32,7 +42,12 @@ pub fn build_board() -> Vec<Vec<char>> {
         let mut row = Vec::with_capacity(BOARD_SIZE + 2);
         row.push(vert_wall);
         for _ in 0..BOARD_SIZE {
-            row.push(BLANK_SQUARE);
+            let block_type = rand::thread_rng().gen_range(0..=1);
+            if block_type == 0 {
+                row.push(BLANK_SQUARE);
+            } else {
+                row.push(EARTH_SQUARE);
+            }
         }
         row.push(vert_wall);
         board.push(row);
