@@ -1,16 +1,16 @@
 use std::io;
 
 use console::{Key, Term};
-use grid_dig::{move_player, print_board, Board, Player};
+use grid_dig::{move_player, print_board, Block, Board, Player};
 
 fn main() {
-    let board = Board::new();
+    let (board, blocks) = Board::new();
     let player = Player::new();
-    game_loop(board, player).unwrap();
+    game_loop(board, player, blocks).unwrap();
     println!("Thanks for playing!")
 }
 
-fn game_loop(mut board: Board, mut player: Player) -> io::Result<()> {
+fn game_loop(mut board: Board, mut player: Player, mut blocks: Vec<Block>) -> io::Result<()> {
     let term = Term::stdout();
 
     term.hide_cursor()?;
@@ -25,6 +25,23 @@ fn game_loop(mut board: Board, mut player: Player) -> io::Result<()> {
 
     loop {
         let player_loc = player.get_loc();
+        let block_count = blocks.len();
+        let mut new_block = Vec::with_capacity(block_count);
+
+        for _ in 0..block_count {
+            let block = blocks.pop().unwrap();
+            let block_loc = block.get_loc();
+
+            if block_loc == player_loc {
+                new_block.push(Block::digg(block_loc))
+            } else {
+                board.set_cell(block_loc, block.get_symbol());
+                new_block.push(block);
+            }
+        }
+
+        blocks.append(&mut new_block);
+
         board.set_cell(player_loc, player.get_symbol());
 
         print_board(&board);

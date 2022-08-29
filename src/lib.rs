@@ -1,9 +1,10 @@
 use console::style;
 use rand::Rng;
 
-const BOARD_SIZE: usize = 16;
+const BOARD_SIZE: usize = 24;
 const BLANK_SQUARE: char = ' ';
 const EARTH_SQUARE: char = 'ↈ';
+const DUG_SQUARE: char = '.';
 
 pub fn move_player(player: &mut Player, board: &mut Board, target: (i8, i8)) {
     {
@@ -11,14 +12,7 @@ pub fn move_player(player: &mut Player, board: &mut Board, target: (i8, i8)) {
         let target_square = board.get_cell(BoardLoc::location_from_target(&player_loc, target));
 
         match target_square {
-            BLANK_SQUARE => {
-                board.vector[player_loc.1][player_loc.0] = crate::BLANK_SQUARE;
-                player.set_loc(BoardLoc::location_from_target(
-                    &player.location.get_loc(),
-                    target,
-                ));
-            }
-            EARTH_SQUARE => {
+            BLANK_SQUARE | EARTH_SQUARE | DUG_SQUARE => {
                 board.vector[player_loc.1][player_loc.0] = crate::BLANK_SQUARE;
                 player.set_loc(BoardLoc::location_from_target(
                     &player.location.get_loc(),
@@ -30,24 +24,26 @@ pub fn move_player(player: &mut Player, board: &mut Board, target: (i8, i8)) {
     };
 }
 
-pub fn build_board_vector() -> Vec<Vec<char>> {
+fn build_board_vector() -> (Vec<Vec<char>>, Vec<Block>) {
     let vert_wall = '|';
     let hor_wall = '#';
 
     let top_and_bottom = vec![hor_wall; BOARD_SIZE + 2];
     let mut board = Vec::with_capacity(BOARD_SIZE + 2);
+    let mut blocks = Vec::with_capacity(BOARD_SIZE);
 
     board.push(top_and_bottom);
 
-    for _ in 0..BOARD_SIZE {
+    for y in 0..BOARD_SIZE {
         let mut row = Vec::with_capacity(BOARD_SIZE + 2);
         row.push(vert_wall);
-        for _ in 0..BOARD_SIZE {
+        for x in 0..BOARD_SIZE {
             let block_type = rand::thread_rng().gen_range(0..=1);
-            if block_type == 0 {
+            if block_type == 0 && 0 < y && y < BOARD_SIZE && 0 < x && x < BOARD_SIZE {
                 row.push(BLANK_SQUARE);
+                blocks.push(Block::build((x, y)));
             } else {
-                row.push(EARTH_SQUARE);
+                row.push(BLANK_SQUARE);
             }
         }
         row.push(vert_wall);
@@ -57,7 +53,7 @@ pub fn build_board_vector() -> Vec<Vec<char>> {
 
     board.push(top_and_bottom);
 
-    board
+    (board, blocks)
 }
 
 pub fn print_board(board: &Board) {
@@ -70,6 +66,9 @@ pub fn print_board(board: &Board) {
                 }
                 EARTH_SQUARE => {
                     print!("{}", style(board[row][cell]).yellow())
+                }
+                DUG_SQUARE => {
+                    print!("{}", style(board[row][cell]).red())
                 }
                 '@' => {
                     print!("{}", style(board[row][cell]).green())
@@ -126,10 +125,9 @@ pub struct Board {
 }
 
 impl Board {
-    pub fn new() -> Board {
-        Board {
-            vector: build_board_vector(),
-        }
+    pub fn new() -> (Board, Vec<Block>) {
+        let (vector, blocks) = build_board_vector();
+        (Board { vector }, blocks)
     }
 
     fn get_cell(&self, player_loc: BoardLoc) -> char {
@@ -141,7 +139,7 @@ impl Board {
     }
 }
 
-pub struct BoardLoc {
+struct BoardLoc {
     x: usize,
     y: usize,
 }
@@ -156,5 +154,33 @@ impl BoardLoc {
 
     fn get_loc(&self) -> (usize, usize) {
         (self.x, self.y)
+    }
+}
+
+pub struct Block {
+    location: BoardLoc,
+    symbol: char,
+}
+
+impl Block {
+    fn new(location: BoardLoc, symbol: char) -> Block {
+        Block { location, symbol }
+    }
+
+    fn build((x, y): (usize, usize)) -> Block {
+        // let symbol =
+        Block::new(BoardLoc { x, y }, EARTH_SQUARE)
+    }
+
+    pub fn digg((x, y): (usize, usize)) -> Block {
+        Block::new(BoardLoc { x, y }, DUG_SQUARE)
+    }
+
+    pub fn get_loc(&self) -> (usize, usize) {
+        self.location.get_loc()
+    }
+
+    pub fn get_symbol(&self) -> char {
+        self.symbol
     }
 }
