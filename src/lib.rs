@@ -3,7 +3,7 @@ use rand::Rng;
 
 const BOARD_SIZE: usize = 24;
 const BLANK_SQUARE: char = ' ';
-const EARTH_SQUARE: char = 'ↈ';
+const RESOURCE_SQUARE: char = 'ↈ';
 const DUG_SQUARE: char = '.';
 
 pub fn move_player(player: &mut Player, board: &mut Board, target: (i8, i8)) {
@@ -12,7 +12,7 @@ pub fn move_player(player: &mut Player, board: &mut Board, target: (i8, i8)) {
         let target_square = board.get_cell(BoardLoc::location_from_target(&player_loc, target));
 
         match target_square {
-            BLANK_SQUARE | EARTH_SQUARE | DUG_SQUARE => {
+            BLANK_SQUARE | RESOURCE_SQUARE | DUG_SQUARE => {
                 board.vector[player_loc.1][player_loc.0] = crate::BLANK_SQUARE;
                 player.set_loc(BoardLoc::location_from_target(
                     &player.location.get_loc(),
@@ -39,7 +39,7 @@ fn build_board_vector() -> (Vec<Vec<char>>, Vec<Block>) {
         row.push(vert_wall);
         for x in 0..BOARD_SIZE {
             let block_type = rand::thread_rng().gen_range(0..=1);
-            if block_type == 0 && 0 < y && y < BOARD_SIZE && 0 < x && x < BOARD_SIZE {
+            if block_type == 0 && 0 < y && 0 < x {
                 row.push(BLANK_SQUARE);
                 blocks.push(Block::build((x, y)));
             } else {
@@ -49,8 +49,8 @@ fn build_board_vector() -> (Vec<Vec<char>>, Vec<Block>) {
         row.push(vert_wall);
         board.push(row);
     }
-    let top_and_bottom = vec![hor_wall; BOARD_SIZE + 2];
 
+    let top_and_bottom = vec![hor_wall; BOARD_SIZE + 2];
     board.push(top_and_bottom);
 
     (board, blocks)
@@ -64,7 +64,7 @@ pub fn print_board(board: &Board) {
                 '#' | '|' => {
                     print!("{}", style(board[row][cell]).cyan())
                 }
-                EARTH_SQUARE => {
+                RESOURCE_SQUARE => {
                     print!("{}", style(board[row][cell]).yellow())
                 }
                 DUG_SQUARE => {
@@ -168,8 +168,9 @@ impl Block {
     }
 
     fn build((x, y): (usize, usize)) -> Block {
-        // let symbol =
-        Block::new(BoardLoc { x, y }, EARTH_SQUARE)
+        let symbols = vec!['▦', RESOURCE_SQUARE];
+        let symbol = symbols[rand::thread_rng().gen_range(0..=1)];
+        Block::new(BoardLoc { x, y }, symbol)
     }
 
     pub fn digg((x, y): (usize, usize)) -> Block {
