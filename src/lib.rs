@@ -34,10 +34,10 @@ fn build_board_vector() -> (Vec<Vec<char>>, Vec<Block>) {
 
     board.push(top_and_bottom);
 
-    for y in 1..BOARD_SIZE + 1 {
+    for y in 1..=BOARD_SIZE {
         let mut row = Vec::with_capacity(BOARD_SIZE + 2);
         row.push(vert_wall);
-        for x in 1..BOARD_SIZE + 1 {
+        for x in 1..=BOARD_SIZE {
             let block_type = rand::thread_rng().gen_range(0..=1);
             if block_type == 0 {
                 row.push(BLANK_SQUARE);
