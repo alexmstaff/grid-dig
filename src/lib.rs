@@ -7,21 +7,40 @@ const RESOURCE_SQUARE: char = 'ↈ';
 const DUG_SQUARE: char = '.';
 
 pub fn move_player(player: &mut Player, board: &mut Board, target: (i8, i8)) {
-    {
-        let player_loc = player.location.get_loc();
-        let target_square = board.get_cell(BoardLoc::location_from_target(&player_loc, target));
+    let player_loc = player.location.get_loc();
+    let target_square = board.get_cell(&BoardLoc::location_from_target(&player_loc, target));
 
-        match target_square {
-            BLANK_SQUARE | RESOURCE_SQUARE | DUG_SQUARE => {
-                board.vector[player_loc.1][player_loc.0] = crate::BLANK_SQUARE;
-                player.set_loc(BoardLoc::location_from_target(
-                    &player.location.get_loc(),
-                    target,
-                ));
-            }
-            _ => return,
+    match target_square {
+        BLANK_SQUARE | RESOURCE_SQUARE | DUG_SQUARE => {
+            board.vector[player_loc.1][player_loc.0] = BLANK_SQUARE;
+            player.set_loc(BoardLoc::location_from_target(
+                &player.location.get_loc(),
+                target,
+            ));
         }
-    };
+        _ => return,
+    }
+}
+
+pub fn debris_sim(block_loc: (usize, usize), board: &mut Board) -> Block {
+    let target_loc = BoardLoc::location_from_target(&block_loc, (0, 1));
+    let target_square = board.get_cell(&target_loc);
+
+    match target_square {
+        BLANK_SQUARE => {
+            board.vector[block_loc.1][block_loc.0] = BLANK_SQUARE;
+            return Block::new(target_loc, '.');
+        }
+        _ => {
+            return Block::new(
+                BoardLoc {
+                    x: block_loc.0,
+                    y: block_loc.1,
+                },
+                '.',
+            )
+        }
+    }
 }
 
 fn build_board_vector() -> (Vec<Vec<char>>, Vec<Block>) {
@@ -130,7 +149,7 @@ impl Board {
         (Board { vector }, blocks)
     }
 
-    fn get_cell(&self, player_loc: BoardLoc) -> char {
+    fn get_cell(&self, player_loc: &BoardLoc) -> char {
         self.vector[player_loc.y][player_loc.x]
     }
 
