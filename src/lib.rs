@@ -39,9 +39,9 @@ fn build_board_vector() -> (Vec<Vec<char>>, Vec<Block>) {
         row.push(vert_wall);
         for x in 0..BOARD_SIZE {
             let block_type = rand::thread_rng().gen_range(0..=1);
-            if block_type == 0 && 0 < y && 0 < x {
+            if block_type == 0 {
                 row.push(BLANK_SQUARE);
-                blocks.push(Block::build((x, y)));
+                blocks.push(Block::build((x + 1, y + 1)));
             } else {
                 row.push(BLANK_SQUARE);
             }
