@@ -47,16 +47,16 @@ fn build_board_vector() -> (Vec<Vec<char>>, Vec<Block>) {
     let vert_wall = '|';
     let hor_wall = '#';
 
-    let top_and_bottom = vec![hor_wall; BOARD_SIZE + 2];
+    let top_and_bottom = vec![hor_wall; 3 * BOARD_SIZE + 2];
     let mut board = Vec::with_capacity(BOARD_SIZE + 2);
     let mut blocks = Vec::with_capacity(BOARD_SIZE);
 
     board.push(top_and_bottom);
 
     for y in 1..=BOARD_SIZE {
-        let mut row = Vec::with_capacity(BOARD_SIZE + 2);
+        let mut row = Vec::with_capacity(3 * BOARD_SIZE + 2);
         row.push(vert_wall);
-        for x in 1..=BOARD_SIZE {
+        for x in 1..=3 * BOARD_SIZE {
             let block_type = rand::thread_rng().gen_range(0..=10);
             if block_type < 4 {
                 row.push(BLANK_SQUARE);
@@ -69,7 +69,7 @@ fn build_board_vector() -> (Vec<Vec<char>>, Vec<Block>) {
         board.push(row);
     }
 
-    let top_and_bottom = vec![hor_wall; BOARD_SIZE + 2];
+    let top_and_bottom = vec![hor_wall; 3 * BOARD_SIZE + 2];
     board.push(top_and_bottom);
 
     (board, blocks)
@@ -187,7 +187,7 @@ impl Block {
     }
 
     fn build((x, y): (usize, usize)) -> Block {
-        let symbols = vec!['▦', '▦', RESOURCE_SQUARE];
+        let symbols = vec!['█', '▓', RESOURCE_SQUARE];
         let symbol = symbols[rand::thread_rng().gen_range(0..=2)];
         Block::new(BoardLoc { x, y }, symbol)
     }
