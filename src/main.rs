@@ -1,7 +1,9 @@
 use std::io;
 
 use console::{Key, Term};
-use grid_dig::{debris_sim, move_player, print_board, Block, Board, Player};
+use grid_dig::{
+    debris_sim, move_player, print_board, Block, Board, Player, DUG_SQUARE, RESOURCE_SQUARE,
+};
 
 fn main() {
     let (board, blocks) = Board::new();
@@ -26,35 +28,37 @@ fn game_loop(mut board: Board, mut player: Player, mut blocks: Vec<Block>) -> io
     loop {
         let player_loc = player.get_loc();
         let block_count = blocks.len();
-        let mut new_block = Vec::with_capacity(block_count);
+        let mut new_blocks = Vec::with_capacity(block_count);
 
         for _ in 0..block_count {
             let block = blocks.pop().unwrap();
             let block_loc = block.get_loc();
+            let block_symbol = block.get_symbol();
 
-            if block_loc == player_loc {
-                new_block.push(Block::digg(block_loc))
+            if block_loc == player_loc && block_symbol == RESOURCE_SQUARE {
+                new_blocks.push(Block::collect_resource(block_loc))
+            } else if block_loc == player.get_digg_target() {
+                new_blocks.push(Block::digg(block_loc, block_symbol))
             } else {
-                let block_symbol = block.get_symbol();
                 match block_symbol {
-                    '.' => {
+                    DUG_SQUARE => {
                         let debris_block = debris_sim(block_loc, &mut board);
                         board.set_cell(debris_block.get_loc(), debris_block.get_symbol());
-                        new_block.push(debris_block);
+                        new_blocks.push(debris_block);
                     }
                     _ => {
                         board.set_cell(block_loc, block_symbol);
-                        new_block.push(block);
+                        new_blocks.push(block);
                     }
                 }
             }
         }
 
-        blocks.append(&mut new_block);
+        blocks.append(&mut new_blocks);
 
         board.set_cell(player_loc, player.get_symbol());
 
-        print_board(&board);
+        print_board(&board, &player);
         term.move_cursor_to(0, 0)?;
 
         let user_move = term.read_key()?;

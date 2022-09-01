@@ -3,28 +3,33 @@ use rand::Rng;
 
 const BOARD_SIZE: usize = 24;
 const BLANK_SQUARE: char = ' ';
-const RESOURCE_SQUARE: char = 'ↈ';
-const DUG_SQUARE: char = '.';
+pub const RESOURCE_SQUARE: char = '◈';
+pub const DIG_SQUARE: char = '◉';
+pub const DUG_SQUARE: char = '.';
+const BLOCK_SQUARES: [char; 4] = ['█', '▓', '▩', '▦'];
+const WALL_SQUARES: [char; 2] = ['|', '#'];
 
 pub fn move_player(player: &mut Player, board: &mut Board, target: (i8, i8)) {
-    let player_loc = player.location.get_loc();
-    let target_square = board.get_cell(&BoardLoc::location_from_target(&player_loc, target));
+    let player_loc = player.get_loc();
+    let target_location = BoardLoc::location_from_target(&player_loc, target);
+    let target_square = BlockPhysics::new(board.get_cell(target_location.get_loc()));
 
     match target_square {
-        BLANK_SQUARE | RESOURCE_SQUARE | DUG_SQUARE => {
-            board.vector[player_loc.1][player_loc.0] = BLANK_SQUARE;
+        BlockPhysics::PassThrough(_) => {
+            board.set_cell(player_loc, BLANK_SQUARE);
             player.set_loc(BoardLoc::location_from_target(
                 &player.location.get_loc(),
                 target,
             ));
         }
+        BlockPhysics::Solid(_) => player.set_digg_target(target_location),
         _ => return,
     }
 }
 
 pub fn debris_sim(block_loc: (usize, usize), board: &mut Board) -> Block {
     let target_loc = BoardLoc::location_from_target(&block_loc, (0, 1));
-    let target_square = board.get_cell(&target_loc);
+    let target_square = board.get_cell(target_loc.get_loc());
 
     match target_square {
         BLANK_SQUARE => {
@@ -75,7 +80,7 @@ fn build_board_vector() -> (Vec<Vec<char>>, Vec<Block>) {
     (board, blocks)
 }
 
-pub fn print_board(board: &Board) {
+pub fn print_board(board: &Board, player: &Player) {
     let board = &board.vector;
     for row in 0..board.len() {
         for cell in 0..board[row].len() {
@@ -99,6 +104,7 @@ pub fn print_board(board: &Board) {
         }
         println!()
     }
+    println!("{:?}", player.get_digg_target())
 }
 
 fn add_target_to_loc(u: usize, i: i8) -> Option<usize> {
@@ -112,6 +118,13 @@ fn add_target_to_loc(u: usize, i: i8) -> Option<usize> {
 pub struct Player {
     location: BoardLoc,
     symbol: char,
+    digg_target: (usize, usize),
+}
+
+pub enum BlockPhysics {
+    Solid(char),
+    PassThrough(char),
+    Wall,
 }
 
 impl Player {
@@ -122,6 +135,7 @@ impl Player {
                 y: 2,
             },
             symbol: '@',
+            digg_target: (0, 0),
         }
     }
 
@@ -130,12 +144,20 @@ impl Player {
         self.location.y = player_loc.y;
     }
 
+    fn set_digg_target(&mut self, target: BoardLoc) {
+        self.digg_target = target.get_loc()
+    }
+
     pub fn get_loc(&self) -> (usize, usize) {
         self.location.get_loc()
     }
 
     pub fn get_symbol(&self) -> char {
         self.symbol
+    }
+
+    pub fn get_digg_target(&self) -> (usize, usize) {
+        self.digg_target
     }
 }
 
@@ -149,8 +171,8 @@ impl Board {
         (Board { vector }, blocks)
     }
 
-    fn get_cell(&self, player_loc: &BoardLoc) -> char {
-        self.vector[player_loc.y][player_loc.x]
+    pub fn get_cell(&self, loc: (usize, usize)) -> char {
+        self.vector[loc.1][loc.0]
     }
 
     pub fn set_cell(&mut self, target: (usize, usize), symbol: char) {
@@ -178,12 +200,15 @@ impl BoardLoc {
 
 pub struct Block {
     location: BoardLoc,
-    symbol: char,
+    symbol: BlockPhysics,
 }
 
 impl Block {
     fn new(location: BoardLoc, symbol: char) -> Block {
-        Block { location, symbol }
+        Block {
+            location,
+            symbol: BlockPhysics::new(symbol),
+        }
     }
 
     fn build((x, y): (usize, usize)) -> Block {
@@ -192,8 +217,12 @@ impl Block {
         Block::new(BoardLoc { x, y }, symbol)
     }
 
-    pub fn digg((x, y): (usize, usize)) -> Block {
+    pub fn collect_resource((x, y): (usize, usize)) -> Block {
         Block::new(BoardLoc { x, y }, DUG_SQUARE)
+    }
+
+    pub fn digg((x, y): (usize, usize), symbol: char) -> Block {
+        Block::new(BoardLoc { x, y }, 's')
     }
 
     pub fn get_loc(&self) -> (usize, usize) {
@@ -201,6 +230,24 @@ impl Block {
     }
 
     pub fn get_symbol(&self) -> char {
-        self.symbol
+        match self.symbol {
+            BlockPhysics::PassThrough(c) => c,
+            BlockPhysics::Solid(c) => c,
+            BlockPhysics::Wall => '#',
+        }
+    }
+
+    pub fn get_type(&self) -> &BlockPhysics {
+        &self.symbol
+    }
+}
+
+impl BlockPhysics {
+    fn new(symbol: char) -> BlockPhysics {
+        match symbol {
+            c if BLOCK_SQUARES.contains(&c) => BlockPhysics::Solid(c),
+            c if WALL_SQUARES.contains(&c) => BlockPhysics::Wall,
+            _ => BlockPhysics::PassThrough(symbol),
+        }
     }
 }
