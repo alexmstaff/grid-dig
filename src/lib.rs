@@ -223,7 +223,12 @@ impl Block {
     }
 
     pub fn digg((x, y): (usize, usize), symbol: char) -> Block {
-        Block::new(BoardLoc { x, y }, 's')
+        let symbol_index = BLOCK_SQUARES.iter().position(|&s| s == symbol).unwrap();
+        if symbol_index < BLOCK_SQUARES.len() - 1 {
+            Block::new(BoardLoc { x, y }, BLOCK_SQUARES[symbol_index + 1])
+        } else {
+            Block::new(BoardLoc { x, y }, DUG_SQUARE)
+        }
     }
 
     pub fn get_loc(&self) -> (usize, usize) {
