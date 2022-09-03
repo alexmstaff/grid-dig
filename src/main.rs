@@ -29,6 +29,7 @@ fn game_loop(mut board: Board, mut player: Player, mut blocks: Vec<Block>) -> io
         let player_loc = player.get_loc();
         let block_count = blocks.len();
         let mut new_blocks = Vec::with_capacity(block_count);
+        let digg_target = player.get_digg_target();
 
         for _ in 0..block_count {
             let block = blocks.pop().unwrap();
@@ -37,8 +38,10 @@ fn game_loop(mut board: Board, mut player: Player, mut blocks: Vec<Block>) -> io
 
             if block_loc == player_loc && block_symbol == RESOURCE_SQUARE {
                 new_blocks.push(Block::collect_resource(block_loc))
-            } else if block_loc == player.get_digg_target() {
-                new_blocks.push(Block::digg(block_loc, block_symbol))
+            } else if block_loc == digg_target {
+                let dug_block = Block::digg(block_loc, block_symbol);
+                board.set_cell(dug_block.get_loc(), dug_block.get_symbol());
+                new_blocks.push(dug_block);
             } else {
                 match block_symbol {
                     DUG_SQUARE => {
@@ -58,7 +61,7 @@ fn game_loop(mut board: Board, mut player: Player, mut blocks: Vec<Block>) -> io
 
         board.set_cell(player_loc, player.get_symbol());
 
-        print_board(&board, &player);
+        print_board(&board);
         term.move_cursor_to(0, 0)?;
 
         let user_move = term.read_key()?;

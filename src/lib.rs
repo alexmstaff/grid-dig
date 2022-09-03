@@ -80,7 +80,7 @@ fn build_board_vector() -> (Vec<Vec<char>>, Vec<Block>) {
     (board, blocks)
 }
 
-pub fn print_board(board: &Board, player: &Player) {
+pub fn print_board(board: &Board) {
     let board = &board.vector;
     for row in 0..board.len() {
         for cell in 0..board[row].len() {
@@ -104,7 +104,6 @@ pub fn print_board(board: &Board, player: &Player) {
         }
         println!()
     }
-    println!("{:?}", player.get_digg_target())
 }
 
 fn add_target_to_loc(u: usize, i: i8) -> Option<usize> {
@@ -115,16 +114,16 @@ fn add_target_to_loc(u: usize, i: i8) -> Option<usize> {
     }
 }
 
-pub struct Player {
-    location: BoardLoc,
-    symbol: char,
-    digg_target: (usize, usize),
-}
-
 pub enum BlockPhysics {
     Solid(char),
     PassThrough(char),
     Wall,
+}
+
+pub struct Player {
+    location: BoardLoc,
+    symbol: char,
+    digg_target: (usize, usize),
 }
 
 impl Player {
@@ -156,8 +155,10 @@ impl Player {
         self.symbol
     }
 
-    pub fn get_digg_target(&self) -> (usize, usize) {
-        self.digg_target
+    pub fn get_digg_target(&mut self) -> (usize, usize) {
+        let dig_target = self.digg_target;
+        self.digg_target = (0, 0);
+        dig_target
     }
 }
 
