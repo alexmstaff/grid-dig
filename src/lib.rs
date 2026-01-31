@@ -22,7 +22,7 @@ pub fn move_player(player: &mut Player, board: &mut Board, target: (i8, i8)) {
                 target,
             ));
         }
-        BlockPhysics::Solid(_) => player.set_digg_target(target_location),
+        BlockPhysics::Solid(_) => player.set_dig_target(target_location),
         _ => return,
     }
 }
@@ -123,7 +123,7 @@ pub enum BlockPhysics {
 pub struct Player {
     location: BoardLoc,
     symbol: char,
-    digg_target: (usize, usize),
+    dig_target: (usize, usize),
 }
 
 impl Player {
@@ -134,7 +134,7 @@ impl Player {
                 y: 2,
             },
             symbol: '@',
-            digg_target: (0, 0),
+            dig_target: (0, 0),
         }
     }
 
@@ -143,8 +143,8 @@ impl Player {
         self.location.y = player_loc.y;
     }
 
-    fn set_digg_target(&mut self, target: BoardLoc) {
-        self.digg_target = target.get_loc()
+    fn set_dig_target(&mut self, target: BoardLoc) {
+        self.dig_target = target.get_loc()
     }
 
     pub fn get_loc(&self) -> (usize, usize) {
@@ -155,9 +155,9 @@ impl Player {
         self.symbol
     }
 
-    pub fn get_digg_target(&mut self) -> (usize, usize) {
-        let dig_target = self.digg_target;
-        self.digg_target = (0, 0);
+    pub fn get_dig_target(&mut self) -> (usize, usize) {
+        let dig_target = self.dig_target;
+        self.dig_target = (0, 0);
         dig_target
     }
 }
@@ -222,7 +222,7 @@ impl Block {
         Block::new(BoardLoc { x, y }, DUG_SQUARE)
     }
 
-    pub fn digg((x, y): (usize, usize), symbol: char) -> Block {
+    pub fn dig((x, y): (usize, usize), symbol: char) -> Block {
         let symbol_index = BLOCK_SQUARES.iter().position(|&s| s == symbol).unwrap();
         if symbol_index < BLOCK_SQUARES.len() - 1 {
             Block::new(BoardLoc { x, y }, BLOCK_SQUARES[symbol_index + 1])
