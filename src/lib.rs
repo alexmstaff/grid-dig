@@ -2,6 +2,7 @@ use console::style;
 use rand::Rng;
 
 const BOARD_SIZE: usize = 24;
+const PLAYER_SQUARE: char = '@';
 const BLANK_SQUARE: char = ' ';
 pub const RESOURCE_SQUARE: char = '◈';
 pub const DIG_SQUARE: char = '◉';
@@ -34,7 +35,7 @@ pub fn debris_sim(block_loc: (usize, usize), board: &mut Board) -> Block {
     match target_square {
         BLANK_SQUARE => {
             board.vector[block_loc.1][block_loc.0] = BLANK_SQUARE;
-            return Block::new(target_loc, '.');
+            return Block::new(target_loc, DUG_SQUARE);
         }
         _ => {
             return Block::new(
@@ -42,15 +43,15 @@ pub fn debris_sim(block_loc: (usize, usize), board: &mut Board) -> Block {
                     x: block_loc.0,
                     y: block_loc.1,
                 },
-                '.',
+                DUG_SQUARE,
             )
         }
     }
 }
 
 fn build_board_vector() -> (Vec<Vec<char>>, Vec<Block>) {
-    let vert_wall = '|';
-    let hor_wall = '#';
+    let vert_wall = WALL_SQUARES[0];
+    let hor_wall = WALL_SQUARES[1];
 
     let top_and_bottom = vec![hor_wall; 3 * BOARD_SIZE + 2];
     let mut board = Vec::with_capacity(BOARD_SIZE + 2);
@@ -85,7 +86,7 @@ pub fn print_board(board: &Board) {
     for row in 0..board.len() {
         for cell in 0..board[row].len() {
             match board[row][cell] {
-                '#' | '|' => {
+                c if WALL_SQUARES.contains(&c) => {
                     print!("{}", style(board[row][cell]).cyan())
                 }
                 RESOURCE_SQUARE => {
@@ -94,7 +95,7 @@ pub fn print_board(board: &Board) {
                 DUG_SQUARE => {
                     print!("{}", style(board[row][cell]).red())
                 }
-                '@' => {
+                PLAYER_SQUARE => {
                     print!("{}", style(board[row][cell]).green())
                 }
                 _ => {
@@ -133,7 +134,7 @@ impl Player {
                 x: BOARD_SIZE / 2,
                 y: 2,
             },
-            symbol: '@',
+            symbol: PLAYER_SQUARE,
             dig_target: (0, 0),
         }
     }
