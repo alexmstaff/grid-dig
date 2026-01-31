@@ -33,7 +33,7 @@ pub fn debris_sim(block_loc: (usize, usize), board: &mut Board) -> Block {
     let target_square = board.get_cell(target_loc.get_loc());
 
     match target_square {
-        BLANK_SQUARE => {
+        BLANK_SQUARE | PLAYER_SQUARE => {
             board.vector[block_loc.1][block_loc.0] = BLANK_SQUARE;
             return Block::new(target_loc, DUG_SQUARE);
         }
