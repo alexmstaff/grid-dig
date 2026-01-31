@@ -18,7 +18,7 @@ fn game_loop(mut board: Board, mut player: Player, mut blocks: Vec<Block>) -> io
     term.hide_cursor()?;
     term.clear_screen()?;
 
-    println!("Use arrow keys to controll digger.");
+    println!("Use arrow keys to control digger.");
     println!("Esc ends the game.");
     println!("Press any key to start");
 
